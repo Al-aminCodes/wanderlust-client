@@ -6,10 +6,10 @@ import EditTravelDialog from "@/components/EditTravelDialog";
 
 import BookingCard from "@/components/bookingCard";
 import { Separator } from "@/components/ui/separator";
-import Image from "next/image";
-import type { ComponentType } from "react";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import Image from "next/image";
+import type { ComponentType } from "react";
 
 interface Travel {
   _id: string;
@@ -21,6 +21,8 @@ interface Travel {
   departureDate: string;
   imageUrl: string;
   description: string;
+
+  isOwner: boolean;
 }
 
 interface PageProps {
@@ -69,6 +71,10 @@ async function getDestination(id: string): Promise<Travel | null> {
 export default async function DestinationDetailPage({ params }: PageProps) {
   const { id } = await params;
   const destination = await getDestination(id);
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  // const isOwner =
+  //   !!session?.user?.email && session.user.email === destination?.userEmail;
 
   if (!destination) {
     return (
@@ -110,11 +116,15 @@ export default async function DestinationDetailPage({ params }: PageProps) {
           </Link>
 
           <div className="flex items-center gap-2">
-            <DestinationEditTravelDialog destination={destination} />
-            <DeleteDialog
-              id={String(destination._id)}
-              name={destination.name}
-            />
+            {destination?.isOwner && (
+              <>
+                <DestinationEditTravelDialog destination={destination} />
+                <DeleteDialog
+                  id={String(destination._id)}
+                  name={destination.name}
+                />
+              </>
+            )}
           </div>
         </div>
 
