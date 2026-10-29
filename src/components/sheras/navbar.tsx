@@ -10,8 +10,8 @@ const navLinks = [
   { label: "Home", href: "/", active: true },
   { label: "Destinations", href: "/destination" },
   { label: "Add-Destination", href: "/add-destination", active: false },
-  { label: "My Bookings", href: "/my-bookings" },
-  { label: "Admin", href: "#" },
+  { label: "My-Bookings", href: "/my-bookings" },
+  { label: "My-Destination", href: "/my-destination" },
 ];
 
 const authLinks = [
@@ -58,7 +58,7 @@ export function Navbar() {
 
         <Link
           href="/"
-          className="font-serif text-2xl font-bold text-cyan-600 md:absolute md:left-1/2 md:-translate-x-1/2"
+          className="font-serif text-2xl mx-6 font-bold text-cyan-600 md:absolute md:left-1/2 md:-translate-x-1/2"
         >
           Wanderlast
         </Link>
