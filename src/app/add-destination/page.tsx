@@ -15,8 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { authClient } from "@/lib/auth-client";
-import { redirect } from "next/navigation";
+import { authClient, useSession } from "@/lib/auth-client";
+
+import { useRouter } from "next/navigation";
 
 const categories = ["Beach", "Mountain", "City", "Adventure", "Cultural"];
 
@@ -33,42 +34,88 @@ const initialForm = {
 
 export default function AddDestinationPage() {
   const [form, setForm] = useState(initialForm);
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const update = (field: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [field]: value }));
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const { data, error } = await authClient.token();
-    console.log(data?.token);
-    const token = data?.token;
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/add-destination`,
-      {
+    try {
+      const { data, error } = await authClient.token();
+
+      if (error || !data?.token) {
+        toast.add({
+          title: "Authentication required",
+          description: "Please log in again and try.",
+          type: "error",
+        });
+        return;
+      }
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        throw new Error("API URL is not configured.");
+      }
+
+      const res = await fetch(`${apiUrl}/add-destination`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          authorization: `bearer ${token}`,
+          Authorization: `Bearer ${data.token}`,
         },
-        body: JSON.stringify(form),
-      },
-    );
+        body: JSON.stringify({
+          ...form,
+          userId: session?.user?.id,
+          userName: session?.user?.name,
+          userEmail: session?.user?.email,
+        }),
+      });
 
-    const datas = await res.json();
-    if (!res.ok) {
+      // Don't assume the backend always returns JSON.
+      const responseText = await res.text();
+
+      let result: { message?: string } = {};
+
+      if (responseText.trim()) {
+        try {
+          result = JSON.parse(responseText);
+        } catch {
+          throw new Error(
+            `Backend returned invalid JSON: ${responseText.slice(0, 120)}`,
+          );
+        }
+      }
+
+      if (!res.ok) {
+        throw new Error(
+          result.message || `Failed to add destination (${res.status})`,
+        );
+      }
+
       toast.add({
-        title: "Settings saved!",
-        description: "fail to add.",
-        type: "error", // Can be: success, error, warning, info, loading
+        title: "Destination added!",
+        description: "Your travel package was added successfully.",
+        type: "success",
+      });
+
+      router.push("/destination");
+      router.refresh();
+    } catch (error) {
+      console.error("Add destination error:", error);
+
+      toast.add({
+        title: "Failed to add destination",
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred.",
+        type: "error",
       });
     }
-    toast.add({
-      title: "Settings saved!",
-      description: "add successfuly.",
-      type: "success", // Can be: success, error, warning, info, loading
-    });
-    redirect("/destination");
   };
 
   return (

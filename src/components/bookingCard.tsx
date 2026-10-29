@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { ArrowRight, Check, CheckCircle2, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -93,12 +93,14 @@ const BookingCard = ({ destination }: { destination: Travel }) => {
     if (isBooking || isBooked) return;
 
     const form = e.currentTarget;
+    const { data, error } = await authClient.token();
+    const token = data?.token;
 
     const departureDate = (
       form.elements.namedItem("departure-date") as HTMLInputElement
     ).value;
 
-    const data = {
+    const datas = {
       ...destination,
       departureDate,
       destinationId: destination._id,
@@ -114,8 +116,9 @@ const BookingCard = ({ destination }: { destination: Travel }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(datas),
       });
 
       const result = await response.json();

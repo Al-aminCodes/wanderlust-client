@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { authClient } from "@/lib/auth-client";
 
 interface EditTravelDialogProps {
   destination: Travel;
@@ -57,7 +58,8 @@ export default function EditTravelDialog({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
+    const { data, error } = await authClient.token();
+    const token = data?.token;
     try {
       setSaving(true);
 
@@ -67,6 +69,7 @@ export default function EditTravelDialog({
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(formData),
         },

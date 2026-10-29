@@ -16,7 +16,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { text } from "stream/consumers";
+
+import { authClient } from "@/lib/auth-client";
 
 interface DeleteDialogProps {
   id: string;
@@ -28,6 +29,8 @@ export default function DeleteDialog({ id, name }: DeleteDialogProps) {
   const router = useRouter();
 
   const handleDelete = async () => {
+    const { data, error } = await authClient.token();
+    const token = data?.token;
     try {
       setLoading(true);
 
@@ -35,6 +38,9 @@ export default function DeleteDialog({ id, name }: DeleteDialogProps) {
         `${process.env.NEXT_PUBLIC_API_URL}/destination/${id}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
       );
 

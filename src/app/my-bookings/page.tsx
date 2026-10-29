@@ -1,4 +1,6 @@
+import { auth } from "@/lib/auth";
 import MyBookingList from "./MyBookingList";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -21,9 +23,17 @@ export interface Booking {
 }
 
 async function getBookings(): Promise<Booking[]> {
+  const jwtToken = await auth.api.getToken({
+    headers: await headers(),
+  });
+  const token = jwtToken?.token;
+
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/booking`, {
       cache: "no-store",
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
     });
 
     if (!response.ok) {
