@@ -17,6 +17,7 @@ export interface Booking {
   price: string;
   userName: string;
   status?: "Confirmed" | "Pending" | "Cancelled";
+  destinationId: string;
 }
 
 async function getBookings(): Promise<Booking[]> {

@@ -199,7 +199,7 @@ export default function MyBookingList({ initialBookings }: MyBookingListProps) {
                   )}
 
                   <Link
-                    href={`/destination/${booking._id}`}
+                    href={`/destination/${booking.destinationId}`}
                     className="inline-flex h-9 items-center justify-center gap-1.5 bg-cyan-600 px-4 text-xs font-medium text-white transition-colors hover:bg-cyan-700"
                   >
                     <Eye className="size-3.5" />
