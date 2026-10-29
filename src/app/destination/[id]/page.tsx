@@ -71,7 +71,7 @@ async function getDestination(id: string): Promise<Travel | null> {
 export default async function DestinationDetailPage({ params }: PageProps) {
   const { id } = await params;
   const destination = await getDestination(id);
-  const session = await auth.api.getSession({ headers: await headers() });
+  // const session = await auth.api.getSession({ headers: await headers() });
 
   // const isOwner =
   //   !!session?.user?.email && session.user.email === destination?.userEmail;
